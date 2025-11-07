@@ -1,13 +1,13 @@
 C:\Users\orian\GestionClients\GestionClients\bin\Debug\net6.0\GestionClients.exe
-C:\Users\orian\GestionClients\GestionClients\bin\Debug\net6.0\GestionClients.deps.json
-C:\Users\orian\GestionClients\GestionClients\bin\Debug\net6.0\GestionClients.runtimeconfig.json
 C:\Users\orian\GestionClients\GestionClients\bin\Debug\net6.0\GestionClients.dll
-C:\Users\orian\GestionClients\GestionClients\bin\Debug\net6.0\GestionClients.pdb
 C:\Users\orian\GestionClients\GestionClients\obj\Debug\net6.0\GestionClients.csproj.AssemblyReference.cache
 C:\Users\orian\GestionClients\GestionClients\obj\Debug\net6.0\GestionClients.GeneratedMSBuildEditorConfig.editorconfig
 C:\Users\orian\GestionClients\GestionClients\obj\Debug\net6.0\GestionClients.AssemblyInfoInputs.cache
 C:\Users\orian\GestionClients\GestionClients\obj\Debug\net6.0\GestionClients.AssemblyInfo.cs
 C:\Users\orian\GestionClients\GestionClients\obj\Debug\net6.0\GestionClients.csproj.CoreCompileInputs.cache
+C:\Users\orian\GestionClients\GestionClients\bin\Debug\net6.0\GestionClients.deps.json
+C:\Users\orian\GestionClients\GestionClients\bin\Debug\net6.0\GestionClients.runtimeconfig.json
+C:\Users\orian\GestionClients\GestionClients\bin\Debug\net6.0\GestionClients.pdb
 C:\Users\orian\GestionClients\GestionClients\obj\Debug\net6.0\GestionClients.dll
 C:\Users\orian\GestionClients\GestionClients\obj\Debug\net6.0\refint\GestionClients.dll
 C:\Users\orian\GestionClients\GestionClients\obj\Debug\net6.0\GestionClients.pdb

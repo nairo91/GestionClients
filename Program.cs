@@ -4,44 +4,39 @@ using System.Text;
 
 class ProgrammeClients
 {
+ static string cheminFichier = "clients.dat"; 
 
-    static string cheminFichier = @"c:\users\orian\clients.dat";
-    
-    //je met des const comme demandé par le prof je choisi de faire pour taille nom prenom tel
-    const int TAILLE_NOM = 30;          
+   // mes const de taille 
+    const int TAILLE_NOM = 30;
     const int TAILLE_PRENOM = 30;
     const int TAILLE_TEL = 20;
 
-    //ici on fait la taille totale de l'enregistrement de l'info 
+    // 4 octets pour l'entier Numero + les autres 
     const int TAILLE_ENREG = 4 + TAILLE_NOM + TAILLE_PRENOM + TAILLE_TEL;
 
-    //ma classe client pour le binaire
     public struct Client
     {
-        public int Numero;       
-        public string Nom;       
-        public string Prenom;   
+        public int Numero;
+        public string Nom;      
+        public string Prenom;    
         public string Telephone;
     }
 
-    //mes conversions
     static void Majuscule(ref string chaine)
     {
         if (string.IsNullOrEmpty(chaine)) { chaine = ""; return; }
         chaine = chaine.Trim().ToUpper();
     }
- 
+
     static void FirstMajuscule(ref string chaine)
     {
-        if (string.IsNullOrEmpty(chaine)) 
-        { chaine = ""; return; }
+        if (string.IsNullOrEmpty(chaine)) { chaine = ""; return; }
         string m = chaine.Trim().ToLower();
-        if (m.Length == 1) 
-        { chaine = m.ToUpper(); return; }
+        if (m.Length == 1) { chaine = m.ToUpper(); return; }
         chaine = char.ToUpper(m[0]) + m.Substring(1);
     }
 
- 
+    //nb fiches dans le fichier
     static int CompterFiches()
     {
         if (!File.Exists(cheminFichier)) return 0;
@@ -80,16 +75,15 @@ class ProgrammeClients
             using (BinaryReader br = new BinaryReader(fs, Encoding.ASCII, true))
             {
                 Client c = new Client();
-                c.Numero = br.ReadInt32();
-                c.Nom = LireChaineFixe(br, TAILLE_NOM);
-                c.Prenom = LireChaineFixe(br, TAILLE_PRENOM);
-                c.Telephone = LireChaineFixe(br, TAILLE_TEL);
+                c.Numero   = br.ReadInt32();
+                c.Nom      = LireChaineFixe(br, TAILLE_NOM);
+                c.Prenom   = LireChaineFixe(br, TAILLE_PRENOM);
+                c.Telephone= LireChaineFixe(br, TAILLE_TEL);
                 return c;
             }
         }
     }
 
-    //reecrit une fiche déjà présente à une position précise
     static void EcrireClientA(int index, Client c)
     {
         using (FileStream fs = new FileStream(cheminFichier, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None))
@@ -105,9 +99,33 @@ class ProgrammeClients
         }
     }
 
-    //écrit la nouvelle fiche à la suite des autres
+   //partie suppression
+    static bool EstSupprime(Client c)
+    {
+        return c.Nom == "*";
+    }
+
+    static int ChercherEmplacementLibre()
+    {
+        int nb = CompterFiches();
+        for (int i = 0; i < nb; i++)
+        {
+            Client c = LireClientA(i);
+            if (EstSupprime(c)) return i;
+        }
+        return -1;
+    }
+
+    // écrit la nouvelle fiche,ajout d'une case libre marquée "*" sinon ajoute à la fin
     static void AjouterClient(Client c)
     {
+        int posLibre = ChercherEmplacementLibre();
+        if (posLibre >= 0)
+        {
+            EcrireClientA(posLibre, c);
+            return;
+        }
+
         using (FileStream fs = new FileStream(cheminFichier, FileMode.Append, FileAccess.Write, FileShare.None))
         using (BinaryWriter bw = new BinaryWriter(fs, Encoding.ASCII, true))
         {
@@ -118,20 +136,20 @@ class ProgrammeClients
         }
     }
 
-   
-   //demande les infos au clavier, formate, crée la fiche
+
     static void SaisirNouveauClient()
     {
         Console.Clear();
         Console.WriteLine("Saisir un nouveau client");
+
         int nb = CompterFiches();
         int prochainNumero = nb + 1;
 
-        Console.Write("Nom (sera stocké en MAJUSCULES) : ");
+        Console.Write("Nom (stocké en MAJUSCULES) : ");
         string nomSaisi = Console.ReadLine();
         Majuscule(ref nomSaisi);
 
-        Console.Write("Prénom (1ère majuscule, reste minuscule) : ");
+        Console.Write("Prénom (1ère majuscule) : ");
         string prenomSaisi = Console.ReadLine();
         FirstMajuscule(ref prenomSaisi);
 
@@ -153,11 +171,11 @@ class ProgrammeClients
         Console.ReadLine();
     }
 
-    //afficher un client (par NOM avec stockage en MAJ)
+    //afficher avec nom 
     static void AfficherClientParNom()
     {
         Console.Clear();
-        Console.WriteLine("Rechercher un client par nom :");
+        Console.WriteLine("Rechercher un client par NOM");
 
         int nb = CompterFiches();
         if (nb == 0)
@@ -168,34 +186,34 @@ class ProgrammeClients
             return;
         }
 
-        Console.Write("Saisir un nom (majuscule ou minuscule) : ");
+        Console.Write("Saisir un nom : ");
         string saisie = Console.ReadLine();
-        Majuscule(ref saisie); // on convertit en MAJ pour comparer au stockage
+        Majuscule(ref saisie);
 
         bool trouve = false;
         for (int i = 0; i < nb; i++)
         {
             Client c = LireClientA(i);
+            //eviter si supprimé
+            if (EstSupprime(c)) continue;
             if (c.Nom == saisie)
             {
                 Console.WriteLine("Fiche #" + i + " -> Numero: " + c.Numero + " | NOM: " + c.Nom + " | Prenom: " + c.Prenom + " | Tel: " + c.Telephone);
                 trouve = true;
             }
         }
-
-        if (!trouve)
-        {
-            Console.WriteLine("Aucun client trouvé pour ce nom.");
-        }
+        if (!trouve) Console.WriteLine("Aucun client trouvé pour ce nom.");
 
         Console.WriteLine("Entrée pour revenir au menu...");
         Console.ReadLine();
     }
 
+
     static void AfficherTous()
     {
         Console.Clear();
-        Console.WriteLine("Tous les clients :");
+        Console.WriteLine("Liste des clients (non supprimés)");
+
         int nb = CompterFiches();
         if (nb == 0)
         {
@@ -205,26 +223,37 @@ class ProgrammeClients
             return;
         }
 
+        bool auMoinsUn = false;
         for (int i = 0; i < nb; i++)
         {
             Client c = LireClientA(i);
+            if (EstSupprime(c)) continue;
             Console.WriteLine("Fiche #" + i + " -> Numero: " + c.Numero + " | NOM: " + c.Nom + " | Prenom: " + c.Prenom + " | Tel: " + c.Telephone);
+            auMoinsUn = true;
         }
+        if (!auMoinsUn) Console.WriteLine("Aucune fiche active.");
 
         Console.WriteLine("Entrée pour revenir au menu...");
         Console.ReadLine();
     }
 
+    //nb clients 
     static void AfficherNombre()
     {
         Console.Clear();
         int nb = CompterFiches();
-        Console.WriteLine("Nombre de clients : " + nb);
+        int actifs = 0;
+        for (int i = 0; i < nb; i++)
+        {
+            Client c = LireClientA(i);
+            if (!EstSupprime(c)) actifs++;
+        }
+        Console.WriteLine("Nombre de clients (actifs) : " + actifs);
         Console.WriteLine("Entrée pour revenir au menu...");
         Console.ReadLine();
     }
 
-    // modifier un client avec numéro de fiche = position, evite la repetitionde de code pouir les modif
+    
     static void InstallerNouvelleValeur(string etiquette, ref string champ, bool appliquerMaj, bool appliquerFirst)
     {
         Console.Write("Nouveau " + etiquette + " : ");
@@ -240,7 +269,7 @@ class ProgrammeClients
     static void ModifierClient()
     {
         Console.Clear();
-        Console.WriteLine("Modifier un client par numéro de fiche");
+        Console.WriteLine("Modifier un client (par numéro de fiche)");
 
         int nb = CompterFiches();
         if (nb == 0)
@@ -254,26 +283,26 @@ class ProgrammeClients
         Console.Write("Numéro de fiche (position, commence à 0) : ");
         string lu = Console.ReadLine();
         int pos;
-        if (!int.TryParse(lu, out pos))
+        if (!int.TryParse(lu, out pos) || pos < 0 || pos >= nb)
         {
-            Console.WriteLine("Numéro invalide.");
-            Console.WriteLine("Entrée pour revenir au menu...");
-            Console.ReadLine();
-            return;
-        }
-        if (pos < 0 || pos >= nb)
-        {
-            Console.WriteLine("Cette fiche n'existe pas.");
+            Console.WriteLine("Position invalide.");
             Console.WriteLine("Entrée pour revenir au menu...");
             Console.ReadLine();
             return;
         }
 
         Client courant = LireClientA(pos);
+        if (EstSupprime(courant))
+        {
+            Console.WriteLine("Fiche supprimée logiquement, restauration requise avant modification.");
+            Console.WriteLine("Entrée pour revenir au menu...");
+            Console.ReadLine();
+            return;
+        }
+
         Console.WriteLine("Actuel -> Numero: " + courant.Numero + " | NOM: " + courant.Nom + " | Prenom: " + courant.Prenom + " | Tel: " + courant.Telephone);
         Console.WriteLine("Laisser vide pour conserver la valeur actuelle.");
 
-        //MaJ conditionnelle, entrée = conserver , a tester ?
         InstallerNouvelleValeur("NOM", ref courant.Nom, true, false);
         InstallerNouvelleValeur("Prénom", ref courant.Prenom, false, true);
 
@@ -285,8 +314,7 @@ class ProgrammeClients
         string rep = Console.ReadLine();
         if (rep == "o" || rep == "O")
         {
-            EcrireClientA(pos, courant); // réécriture au même endroit avec la position qu'on a stock
-        
+            EcrireClientA(pos, courant);
             Console.WriteLine("Fiche modifiée.");
         }
         else
@@ -294,59 +322,289 @@ class ProgrammeClients
             Console.WriteLine("Modification annulée.");
         }
 
-        Console.WriteLine("Entrée pour revenir au menu");
+        Console.WriteLine("Entrée pour revenir au menu...");
         Console.ReadLine();
     }
 
-// le switch boucle pourfaire menu 
+    //Les suppressions
+    static void SupprimerLogiquement()
+    {
+        Console.Clear();
+        Console.WriteLine("Supprimer une fiche (suppression logique)");
+
+        int nb = CompterFiches();
+        if (nb == 0)
+        {
+            Console.WriteLine("Fichier vide. Impossible de supprimer.");
+            Console.WriteLine("Entrée pour revenir au menu...");
+            Console.ReadLine();
+            return;
+        }
+
+        Console.Write("Numéro de fiche (position, commence à 0) : ");
+        string lu = Console.ReadLine();
+        int pos;
+        if (!int.TryParse(lu, out pos) || pos < 0 || pos >= nb)
+        {
+            Console.WriteLine("Position invalide.");
+            Console.WriteLine("Entrée pour revenir au menu...");
+            Console.ReadLine();
+            return;
+        }
+
+        Client c = LireClientA(pos);
+        if (EstSupprime(c))
+        {
+            Console.WriteLine("Cette fiche est déjà supprimée logiquement.");
+            Console.WriteLine("Entrée pour revenir au menu...");
+            Console.ReadLine();
+            return;
+        }
+
+        Console.WriteLine("Fiche #" + pos + " -> Numero: " + c.Numero + " | NOM: " + c.Nom + " | Prenom: " + c.Prenom + " | Tel: " + c.Telephone);
+        Console.Write("Confirmer la suppression logique ? (o/n) : ");
+        string rep = Console.ReadLine();
+        if (rep == "o" || rep == "O")
+        {
+            c.Nom = "*";
+            EcrireClientA(pos, c);
+            Console.WriteLine("Fiche marquée comme supprimée (Nom=\"*\").");
+        }
+        else
+        {
+            Console.WriteLine(">> Suppression annulée.");
+        }
+
+        Console.WriteLine("Entrée pour revenir au menu...");
+        Console.ReadLine();
+    }
+
+
+    static void RestaurerFiche()
+    {
+        Console.Clear();
+        Console.WriteLine("Restaurer une fiche supprimée");
+
+        int nb = CompterFiches();
+        if (nb == 0)
+        {
+            Console.WriteLine("Fichier vide.");
+            Console.WriteLine("Entrée pour revenir au menu...");
+            Console.ReadLine();
+            return;
+        }
+
+        bool auMoinsUne = false;
+        for (int i = 0; i < nb; i++)
+        {
+            Client c = LireClientA(i);
+            if (EstSupprime(c))
+            {
+               Console.WriteLine(
+                    "Fiche #" + i +
+                    " -> SUPPRIMEE (Numero: " + c.Numero +
+                    ") | Prenom: " + c.Prenom +
+                    " | Tel: " + c.Telephone
+                );
+
+                auMoinsUne = true;
+            }
+        }
+        if (!auMoinsUne)
+        {
+            Console.WriteLine("Aucune fiche supprimée à restaurer.");
+            Console.WriteLine("Entrée pour revenir au menu...");
+            Console.ReadLine();
+            return;
+        }
+
+        Console.Write("Numéro de fiche à restaurer : ");
+        string lu = Console.ReadLine();
+        int pos;
+        if (!int.TryParse(lu, out pos) || pos < 0 || pos >= nb)
+        {
+            Console.WriteLine("Position invalide.");
+            Console.WriteLine("Entrée pour revenir au menu...");
+            Console.ReadLine();
+            return;
+        }
+
+        Client cible = LireClientA(pos);
+        if (!EstSupprime(cible))
+        {
+            Console.WriteLine("Cette fiche n'est pas marquée comme supprimée.");
+            Console.WriteLine("Entrée pour revenir au menu...");
+            Console.ReadLine();
+            return;
+        }
+
+        Console.Write("Tapez le NOM du client (stocké en MAJUSCULES) : ");
+        string nom = Console.ReadLine();
+        Majuscule(ref nom);
+        if (nom.Length == 0)
+        {
+            Console.WriteLine("Nom invalide.");
+            Console.WriteLine("Entrée pour revenir au menu...");
+            Console.ReadLine();
+            return;
+        }
+
+        cible.Nom = nom;
+        EcrireClientA(pos, cible);
+
+        Console.WriteLine("Fiche restaurée : NOM = " + nom);
+        Console.WriteLine("Entrée pour revenir au menu...");
+        Console.ReadLine();
+    }
+
+    static void AfficherSupprimees()
+    {
+        Console.Clear();
+        Console.WriteLine("Fiches supprimées (Nom = \"*\")");
+
+        int nb = CompterFiches();
+        if (nb == 0)
+        {
+            Console.WriteLine("Fichier vide.");
+            Console.WriteLine("Entrée pour revenir au menu...");
+            Console.ReadLine();
+            return;
+        }
+
+        bool auMoinsUne = false;
+        for (int i = 0; i < nb; i++)
+        {
+            Client c = LireClientA(i);
+            if (EstSupprime(c))
+            {
+                Console.WriteLine("Fiche #" + i + " -> Numero: " + c.Numero + " | NOM: " + c.Nom + " | Prenom: " + c.Prenom + " | Tel: " + c.Telephone);
+
+                auMoinsUne = true;
+            }
+        }
+
+        if (!auMoinsUne)
+            Console.WriteLine("Aucune fiche supprimée.");
+
+        Console.WriteLine("Entrée pour revenir au menu...");
+        Console.ReadLine();
+    }
+
+    static void CompresserFichier()
+    {
+         Console.Clear();
+    Console.WriteLine("Compression du fichier (suppression physique des fiches supprimées)");
+
+    if (!File.Exists(cheminFichier))
+    {
+        Console.WriteLine("Aucun fichier à compresser.");
+        Console.WriteLine("Entrée pour revenir au menu...");
+        Console.ReadLine();
+        return;
+    }
+
+    string tempFile = "clients_temp.dat";
+
+    using (FileStream fsSource = new FileStream(cheminFichier, FileMode.Open, FileAccess.Read))
+    using (FileStream fsDest = new FileStream(tempFile, FileMode.Create, FileAccess.Write))
+    using (BinaryReader br = new BinaryReader(fsSource, Encoding.ASCII, true))
+    using (BinaryWriter bw = new BinaryWriter(fsDest, Encoding.ASCII, true))
+    {
+        long nb = fsSource.Length / TAILLE_ENREG;
+
+        for (int i = 0; i < nb; i++)
+        {
+            Client c = LireClientA(i);
+            if (!EstSupprime(c))
+            {
+                bw.Write(c.Numero);
+                EcrireChaineFixe(bw, c.Nom, TAILLE_NOM);
+                EcrireChaineFixe(bw, c.Prenom, TAILLE_PRENOM);
+                EcrireChaineFixe(bw, c.Telephone, TAILLE_TEL);
+            }
+        }
+    }
+
+    // Remplacer l'ancien fichier par le nouveau
+    File.Delete(cheminFichier);
+    File.Move(tempFile, cheminFichier);
+
+    Console.WriteLine("Compression terminée !");
+    Console.WriteLine("Les fiches supprimées ont été effacées physiquement.");
+    Console.WriteLine("Entrée pour revenir au menu...");
+    Console.ReadLine();
+    }
+
+
+    //min menu switch
     static void AfficherMenu()
     {
         Console.Clear();
-        Console.WriteLine("=== GESTION DES CLIENTS (binaire) ===");
+        Console.WriteLine("GESTION DES CLIENTS");
         Console.WriteLine("1 - Saisir un nouveau client");
-        Console.WriteLine("2 - Afficher un client (par NOM)");
+        Console.WriteLine("2 - Afficher un client (par nom)");
         Console.WriteLine("3 - Afficher tous les clients");
         Console.WriteLine("4 - Afficher le nombre de clients");
-        Console.WriteLine("5 - Modifier un client (par numéro de fiche)");
+        Console.WriteLine("5 - Modifier un client (par numero de fiche)");
+        Console.WriteLine("6 - Supprimer une fiche)");
+        Console.WriteLine("7 - Restaurer une fiche supprimée");
+        Console.WriteLine("9 - Compresser le fichier (supprimer définitivement les fiches supprimées)");
+        Console.WriteLine("8 - Afficher UNIQUEMENT les fiches supprimées");
+        Console.WriteLine("9 - Compresser le fichier (supprimer définitivement les fiches supprimées)");
+
         Console.WriteLine("0 - Quitter");
         Console.Write("Votre choix : ");
     }
 
-    static void Main()
-    {
-        //créer dossier si chemin contient répertoire, si existe pas cree le doss
-        string dossier = Path.GetDirectoryName(cheminFichier);
-        if (!string.IsNullOrEmpty(dossier)) Directory.CreateDirectory(dossier);
+   static void Main()
+{
+    // S'assurer que le dossier du fichier existe (utile si cheminFichier contient un répertoire)
+    string fullPath = Path.GetFullPath(cheminFichier);
+    string? dir = Path.GetDirectoryName(fullPath);
+    if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
+        Directory.CreateDirectory(dir);
 
-        if (!File.Exists(cheminFichier))
+    // S'assurer que le fichier existe
+    if (!File.Exists(cheminFichier))
+        using (File.Create(cheminFichier)) { }
+
+    int choix = -1;
+    while (choix != 0)
+    {
+        AfficherMenu();
+
+        string? lu = Console.ReadLine();
+        if (!int.TryParse(lu, out choix))
         {
-            using (File.Create(cheminFichier)) { } // crée un binaire vide
+            Console.WriteLine("Choix invalide. Entrée pour continuer...");
+            Console.ReadLine();
+            continue;
         }
 
-        int choix = -1;
-        while (choix != 0)
+        switch (choix)
         {
-            AfficherMenu();
-            string lu = Console.ReadLine();
-            int.TryParse(lu, out choix);
+            case 1: SaisirNouveauClient(); break;
+            case 2: AfficherClientParNom(); break;
+            case 3: AfficherTous(); break;
+            case 4: AfficherNombre(); break;
+            case 5: ModifierClient(); break;
+            case 6: SupprimerLogiquement(); break;
+            case 7: RestaurerFiche(); break;
+            case 8: AfficherSupprimees(); break;
+            case 9: CompresserFichier(); break;
 
-            switch (choix)
-            {
-                case 1: SaisirNouveauClient(); break;
-                case 2: AfficherClientParNom(); break;
-                case 3: AfficherTous(); break;
-                case 4: AfficherNombre(); break;
-                case 5: ModifierClient(); break;
-                case 0:
-                    Console.Clear();
-                    Console.WriteLine("Au revoir.");
-                    break;
-                default:
-                    Console.WriteLine("Choix invalide. Entrée pour continuer...");
-                    Console.ReadLine();
-                    break;
-            }
+
+            case 0:
+                Console.Clear();
+                Console.WriteLine("Au revoir.");
+                break;
+            default:
+                Console.WriteLine("Choix invalide. Entrée pour continuer...");
+                Console.ReadLine();
+                break;
         }
     }
-    
+}
+
+
 }
