@@ -490,50 +490,56 @@ class ProgrammeClients
         Console.ReadLine();
     }
 
-    static void CompresserFichier()
-    {
-         Console.Clear();
-    Console.WriteLine("Compression du fichier (suppression physique des fiches supprimées)");
+  
+static void CompresserFichier()
+{
+    Console.Clear();
+    Console.WriteLine("Compression du fichier (suppression physique des fiches *).");
 
-    if (!File.Exists(cheminFichier))
+    int nb = CompterFiches();
+    if (nb == 0)
     {
-        Console.WriteLine("Aucun fichier à compresser.");
+        Console.WriteLine("Fichier vide, rien à compresser.");
         Console.WriteLine("Entrée pour revenir au menu...");
         Console.ReadLine();
         return;
     }
 
-    string tempFile = "clients_temp.dat";
+    string tempFile = "clients_tmp.dat";
 
-    using (FileStream fsSource = new FileStream(cheminFichier, FileMode.Open, FileAccess.Read))
-    using (FileStream fsDest = new FileStream(tempFile, FileMode.Create, FileAccess.Write))
-    using (BinaryReader br = new BinaryReader(fsSource, Encoding.ASCII, true))
-    using (BinaryWriter bw = new BinaryWriter(fsDest, Encoding.ASCII, true))
+    //ouvrir fichier temp
+    using (FileStream fsTemp = new FileStream(tempFile, FileMode.Create, FileAccess.Write, FileShare.None))
+    using (BinaryWriter bw = new BinaryWriter(fsTemp, Encoding.ASCII, true))
     {
-        long nb = fsSource.Length / TAILLE_ENREG;
+        int nouveauIndex = 0;
 
+        //parcour fichier
         for (int i = 0; i < nb; i++)
         {
             Client c = LireClientA(i);
-            if (!EstSupprime(c))
-            {
-                bw.Write(c.Numero);
-                EcrireChaineFixe(bw, c.Nom, TAILLE_NOM);
-                EcrireChaineFixe(bw, c.Prenom, TAILLE_PRENOM);
-                EcrireChaineFixe(bw, c.Telephone, TAILLE_TEL);
-            }
+
+            //si fiche est marquée supprimée (Nom = "*" on la saute
+            if (EstSupprime(c)) 
+                continue;
+
+            //sinon on la recopie dans le nouveau fichier à la suite
+            bw.Write(c.Numero);
+            EcrireChaineFixe(bw, c.Nom, TAILLE_NOM);
+            EcrireChaineFixe(bw, c.Prenom, TAILLE_PRENOM);
+            EcrireChaineFixe(bw, c.Telephone, TAILLE_TEL);
+
+            nouveauIndex++;
         }
     }
 
-    // Remplacer l'ancien fichier par le nouveau
+    // remplacement fichier
     File.Delete(cheminFichier);
     File.Move(tempFile, cheminFichier);
 
-    Console.WriteLine("Compression terminée !");
-    Console.WriteLine("Les fiches supprimées ont été effacées physiquement.");
+    Console.WriteLine("Compression terminée. Le fichier ne contient plus que les fiches non supprimées.");
     Console.WriteLine("Entrée pour revenir au menu...");
     Console.ReadLine();
-    }
+}
 
 
     //min menu switch
@@ -548,7 +554,6 @@ class ProgrammeClients
         Console.WriteLine("5 - Modifier un client (par numero de fiche)");
         Console.WriteLine("6 - Supprimer une fiche)");
         Console.WriteLine("7 - Restaurer une fiche supprimée");
-        Console.WriteLine("9 - Compresser le fichier (supprimer définitivement les fiches supprimées)");
         Console.WriteLine("8 - Afficher UNIQUEMENT les fiches supprimées");
         Console.WriteLine("9 - Compresser le fichier (supprimer définitivement les fiches supprimées)");
 

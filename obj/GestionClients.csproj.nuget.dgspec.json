@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "c:\\Users\\orian\\GestionClients\\GestionClients\\GestionClients.csproj": {}
+    "C:\\Users\\orian\\GestionClients\\GestionClients\\GestionClients.csproj": {}
   },
   "projects": {
-    "c:\\Users\\orian\\GestionClients\\GestionClients\\GestionClients.csproj": {
+    "C:\\Users\\orian\\GestionClients\\GestionClients\\GestionClients.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "c:\\Users\\orian\\GestionClients\\GestionClients\\GestionClients.csproj",
+        "projectUniqueName": "C:\\Users\\orian\\GestionClients\\GestionClients\\GestionClients.csproj",
         "projectName": "GestionClients",
-        "projectPath": "c:\\Users\\orian\\GestionClients\\GestionClients\\GestionClients.csproj",
+        "projectPath": "C:\\Users\\orian\\GestionClients\\GestionClients\\GestionClients.csproj",
         "packagesPath": "C:\\Users\\orian\\.nuget\\packages\\",
-        "outputPath": "c:\\Users\\orian\\GestionClients\\GestionClients\\obj\\",
+        "outputPath": "C:\\Users\\orian\\GestionClients\\GestionClients\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\orian\\AppData\\Roaming\\NuGet\\NuGet.Config",
