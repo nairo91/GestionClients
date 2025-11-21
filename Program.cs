@@ -2,9 +2,52 @@
 using System.IO;
 using System.Text;
 
+//pour liste
+using System.Collections.Generic;
+using System.Reflection;
+
 class ProgrammeClients
 {
  static string cheminFichier = "clients.dat"; 
+
+    // les listes pour le menu dynamique
+    static List<string> textesMenu = new List<string>();
+    static List<string> nomsMethodes = new List<string>();
+
+    static void InitialiserMenu()
+    {
+        // ordre important car fiat: index 0 = option 1, index 1 = option 2, etc..
+
+        textesMenu.Clear();
+        nomsMethodes.Clear();
+
+        textesMenu.Add("Saisir un nouveau client");
+        nomsMethodes.Add("SaisirNouveauClient");
+
+        textesMenu.Add("Afficher un client (par nom)");
+        nomsMethodes.Add("AfficherClientParNom");
+
+        textesMenu.Add("Afficher tous les clients");
+        nomsMethodes.Add("AfficherTous");
+
+        textesMenu.Add("Afficher le nombre de clients");
+        nomsMethodes.Add("AfficherNombre");
+
+        textesMenu.Add("Modifier un client (par numero de fiche)");
+        nomsMethodes.Add("ModifierClient");
+
+        textesMenu.Add("Supprimer une fiche");
+        nomsMethodes.Add("SupprimerLogiquement");
+
+        textesMenu.Add("Restaurer une fiche supprimée");
+        nomsMethodes.Add("RestaurerFiche");
+
+        textesMenu.Add("Afficher uniquement les fiches supprimées");
+        nomsMethodes.Add("AfficherSupprimees");
+
+        textesMenu.Add("Compresser le fichier (supprimer définitivement les fiches supprimées)");
+        nomsMethodes.Add("CompresserFichier");
+    }
 
    // mes const de taille 
     const int TAILLE_NOM = 30;
@@ -542,74 +585,163 @@ static void CompresserFichier()
 }
 
 
-    //min menu switch
+    //mon menu switch qu'on remplace donc en commentaire pour le moment
+    // static void AfficherMenu()
+    // {
+    //     Console.Clear();
+    //     Console.WriteLine("GESTION DES CLIENTS");
+    //     Console.WriteLine("1 - Saisir un nouveau client");
+    //     Console.WriteLine("2 - Afficher un client (par nom)");
+    //     Console.WriteLine("3 - Afficher tous les clients");
+    //     Console.WriteLine("4 - Afficher le nombre de clients");
+    //     Console.WriteLine("5 - Modifier un client (par numero de fiche)");
+    //     Console.WriteLine("6 - Supprimer une fiche)");
+    //     Console.WriteLine("7 - Restaurer une fiche supprimée");
+    //     Console.WriteLine("8 - Afficher UNIQUEMENT les fiches supprimées");
+    //     Console.WriteLine("9 - Compresser le fichier (supprimer définitivement les fiches supprimées)");
+
+    //     Console.WriteLine("0 - Quitter");
+    //     Console.Write("Votre choix : ");
+    // }
+
+    // menu avec liste dynamique
     static void AfficherMenu()
     {
         Console.Clear();
         Console.WriteLine("GESTION DES CLIENTS");
-        Console.WriteLine("1 - Saisir un nouveau client");
-        Console.WriteLine("2 - Afficher un client (par nom)");
-        Console.WriteLine("3 - Afficher tous les clients");
-        Console.WriteLine("4 - Afficher le nombre de clients");
-        Console.WriteLine("5 - Modifier un client (par numero de fiche)");
-        Console.WriteLine("6 - Supprimer une fiche)");
-        Console.WriteLine("7 - Restaurer une fiche supprimée");
-        Console.WriteLine("8 - Afficher UNIQUEMENT les fiches supprimées");
-        Console.WriteLine("9 - Compresser le fichier (supprimer définitivement les fiches supprimées)");
+
+        for (int i = 0; i < textesMenu.Count; i++)
+        {
+            int numero = i + 1; // 1,2,3...
+            Console.WriteLine(numero + " - " + textesMenu[i]);
+        }
 
         Console.WriteLine("0 - Quitter");
         Console.Write("Votre choix : ");
     }
 
-   static void Main()
-{
-    // S'assurer que le dossier du fichier existe (utile si cheminFichier contient un répertoire)
-    string fullPath = Path.GetFullPath(cheminFichier);
-    string? dir = Path.GetDirectoryName(fullPath);
-    if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
-        Directory.CreateDirectory(dir);
+//ancien main avec switch
+//    static void Main()
+// {
+//     // S'assurer que le dossier du fichier existe (utile si cheminFichier contient un répertoire)
+//     string fullPath = Path.GetFullPath(cheminFichier);
+//     string? dir = Path.GetDirectoryName(fullPath);
+//     if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
+//         Directory.CreateDirectory(dir);
 
-    // S'assurer que le fichier existe
-    if (!File.Exists(cheminFichier))
-        using (File.Create(cheminFichier)) { }
+//     // S'assurer que le fichier existe
+//     if (!File.Exists(cheminFichier))
+//         using (File.Create(cheminFichier)) { }
 
-    int choix = -1;
-    while (choix != 0)
+//     int choix = -1;
+//     while (choix != 0)
+//     {
+//         AfficherMenu();
+
+//         string? lu = Console.ReadLine();
+//         if (!int.TryParse(lu, out choix))
+//         {
+//             Console.WriteLine("Choix invalide. Entrée pour continuer...");
+//             Console.ReadLine();
+//             continue;
+//         }
+
+//         switch (choix)
+//         {
+//             case 1: SaisirNouveauClient(); break;
+//             case 2: AfficherClientParNom(); break;
+//             case 3: AfficherTous(); break;
+//             case 4: AfficherNombre(); break;
+//             case 5: ModifierClient(); break;
+//             case 6: SupprimerLogiquement(); break;
+//             case 7: RestaurerFiche(); break;
+//             case 8: AfficherSupprimees(); break;
+//             case 9: CompresserFichier(); break;
+
+
+//             case 0:
+//                 Console.Clear();
+//                 Console.WriteLine("Au revoir.");
+//                 break;
+//             default:
+//                 Console.WriteLine("Choix invalide. Entrée pour continuer...");
+//                 Console.ReadLine();
+//                 break;
+//         }
+//     }
+// }
+
+
+//nouveau main avec menu dynamique
+    static void Main()
     {
-        AfficherMenu();
+        // on appel la methode qui init le menu
+        InitialiserMenu();
 
-        string? lu = Console.ReadLine();
-        if (!int.TryParse(lu, out choix))
+        // verifier si dossier fichier existe
+        string fullPath = Path.GetFullPath(cheminFichier);
+        string? dir = Path.GetDirectoryName(fullPath);
+        if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
+            Directory.CreateDirectory(dir);
+
+        
+        if (!File.Exists(cheminFichier))
+            using (File.Create(cheminFichier)) { }
+
+        int choix = -1;
+        while (choix != 0)
         {
-            Console.WriteLine("Choix invalide. Entrée pour continuer...");
-            Console.ReadLine();
-            continue;
-        }
+            AfficherMenu();
 
-        switch (choix)
-        {
-            case 1: SaisirNouveauClient(); break;
-            case 2: AfficherClientParNom(); break;
-            case 3: AfficherTous(); break;
-            case 4: AfficherNombre(); break;
-            case 5: ModifierClient(); break;
-            case 6: SupprimerLogiquement(); break;
-            case 7: RestaurerFiche(); break;
-            case 8: AfficherSupprimees(); break;
-            case 9: CompresserFichier(); break;
+            string? lu = Console.ReadLine();
+            if (!int.TryParse(lu, out choix))
+            {
+                Console.WriteLine("Choix invalide. Entrée pour continuer...");
+                Console.ReadLine();
+                continue;
+            }
 
-
-            case 0:
+            if (choix == 0)
+            {
                 Console.Clear();
                 Console.WriteLine("Au revoir.");
                 break;
-            default:
+            }
+
+        
+            if (choix < 1 || choix > textesMenu.Count)
+            {
                 Console.WriteLine("Choix invalide. Entrée pour continuer...");
                 Console.ReadLine();
-                break;
+                continue;
+            }
+
+            // permet de recuperer le nom de la méthode liée à ce numéro
+            string nomMethode = nomsMethodes[choix - 1];
+
+            //recuperer la méthode via reflection, inspire de l'exemple donné dans la fifche de mise en situation
+            MethodInfo? methodInfo = typeof(ProgrammeClients)
+                .GetMethod(nomMethode, BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public);
+
+            if (methodInfo == null)
+            {
+                Console.WriteLine("Erreur interne : méthode \"" + nomMethode + "\" introuvable.");
+                Console.ReadLine();
+                continue;
+            }
+
+            try
+            {
+                // methodes static et sans parametres donc null,null
+                methodInfo.Invoke(null, null);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Erreur lors de l'exécution de l'option : " + ex.Message);
+                Console.ReadLine();
+            }
         }
     }
 }
 
 
-}
